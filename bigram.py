@@ -39,6 +39,7 @@ def get_batch(split):
     x, y = tf.convert_to_tensor(x, dtype=tf.int64), tf.convert_to_tensor(y, dtype=tf.int64)
     return x, y
 
+
 @tf.function
 def estimate_loss():
     out = {}
