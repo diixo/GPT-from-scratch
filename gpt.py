@@ -89,6 +89,7 @@ class Head(tf.keras.layers.Layer):
         # compute attention scores ("affinities")
         wei = tf.matmul(q, tf.transpose(k, perm=[0, 2, 1])) * tf.math.rsqrt(tf.cast(k.shape[-1], tf.float32))  # (B, T, T)
         wei = tf.where(self.tril[:T, :T] == 0, float('-inf'), wei)  # (B, T, T)
+        # the same as previous: wei = wei + tf.math.log(self.tril[:T, :T])
         wei = tf.nn.softmax(wei, axis=-1)  # (B, T, T)
         wei = self.dropout(wei)
 
