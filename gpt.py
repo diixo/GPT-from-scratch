@@ -10,7 +10,7 @@ block_size = 256
 max_iters = 5000
 eval_interval = 100
 learning_rate = 3e-4
-eval_iters = 200
+eval_iters = 100
 n_embd = 384
 n_head = 6
 n_layer = 6
@@ -168,9 +168,9 @@ class GPTLanguageModel(tf.keras.Model):
         # idx and targets are both (B,T) tensor of integers
         tok_emb = self.token_embedding_table(idx)  # (B,T,C)
         pos_emb = self.position_embedding_table(tf.range(T, dtype=tf.float32))  # (T,C)
-        x = tok_emb + pos_emb  # (B,T,C)
-        x = self.blocks(x)  # (B,T,C)
-        x = self.ln_f(x)  # (B,T,C)
+        x = tok_emb + pos_emb   # (B,T,C)
+        x = self.blocks(x)      # (B,T,C)
+        x = self.ln_f(x)        # (B,T,C)
         logits = self.lm_head(x)  # (B,T,vocab_size)
 
         if targets is None:
@@ -209,17 +209,18 @@ optimizer = tf.keras.optimizers.Adam(learning_rate)
 
 for iter in range(max_iters):
 
-    # every once in a while evaluate the loss on train and val sets
-    if iter % eval_interval == 0 or iter == max_iters - 1:
-        losses = estimate_loss(model)
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
-
     # sample a batch of data
     xb, yb = get_batch('train')
 
     # evaluate the loss
     with tf.GradientTape() as tape:
         logits, loss = model(xb, yb)
+
+    # every once in a while evaluate the loss on train and val sets
+    if iter % eval_interval == 0 or iter == max_iters - 1:
+        #losses = estimate_loss(model)
+        print(f"...on iter={iter}: train loss={loss:.4f}")
+
 
     grads = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(grads, model.trainable_variables))
@@ -230,3 +231,5 @@ for iter in range(max_iters):
 context = tf.zeros((1, 1), dtype=tf.int64)
 generated_sequence = model.generate(context, max_new_tokens=500).numpy()
 print(decode(generated_sequence[0]))
+
+model.save_weights('gpt_model_weights.h5')
