@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
+from keras import layers
 
 # Hyperparameters
 batch_size = 32
@@ -61,6 +61,7 @@ class BigramLanguageModel(keras.Model):
         super(BigramLanguageModel, self).__init__()
         self.token_embedding_table = layers.Embedding(vocab_size, vocab_size)
 
+
     def call(self, idx, targets=None):
 
         logits = self.token_embedding_table(idx)
@@ -71,8 +72,8 @@ class BigramLanguageModel(keras.Model):
             logits = tf.reshape(logits, (B * T, C))
             targets = tf.reshape(targets, (B * T,))
             loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=targets, logits=logits))
-
         return logits, loss
+
 
     def generate(self, idx, max_new_tokens):
         for _ in tf.range(max_new_tokens):
@@ -82,6 +83,7 @@ class BigramLanguageModel(keras.Model):
             idx_next = tf.random.categorical(tf.math.log(probs), num_samples=1, dtype=tf.int64)
             idx = tf.concat([idx, idx_next], axis=1)
         return idx
+
 
 model = BigramLanguageModel(vocab_size)
 
