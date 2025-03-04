@@ -6,7 +6,7 @@ from keras import layers
 batch_size = 32
 block_size = 8
 max_iters = 3000
-eval_interval = 300
+eval_interval = 100
 learning_rate = 1e-2
 eval_iters = 200
 
@@ -99,8 +99,10 @@ for iter in tf.range(max_iters):
     xb, yb = get_batch('train')
 
     with tf.GradientTape() as tape:
+        # forward pass
         logits, loss = model(xb, yb)
 
+    # backward pass
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
