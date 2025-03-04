@@ -16,16 +16,18 @@ class Embedding:
         return self.forward(x)
 
 
+def test():
 
-vocab_sz = 1000
-context_sz = 32
-embedding = Embedding(input_dim=vocab_sz, output_dim=context_sz)
-print("Embedding.shape:", embedding.shape)
+    vocab_sz = 1000
+    context_sz = 32
+    embedding = Embedding(input_dim=vocab_sz, output_dim=context_sz)
+    print("Embedding.shape:", embedding.shape)
 
-input_tokens = np.array([[1, 5, 10], [7, 2, 0]]) # (2, 3) = (batch, token)
+    input_tokens = np.array([[1, 5, 10], [7, 2, 0]]) # (2, 3) = (batch, token)
+    # token indices are class indices, where for each of its embeddings is a mapping of its properties to context spaces
 
-embedded_output = embedding(input_tokens)
+    embedded_output = embedding(input_tokens)
 
-print("Shape:", embedded_output.shape)          # (2, 3, 32) = (batch, token, output=context_sz)
-print(embedding.embeddings[1])                  # Embedding of token=1
-print("Sample vector:", embedded_output[0, 0])  # Embedding of first sequence of first token(embeddings[input_tokens[0,0]=1])
+    print("Shape:", embedded_output.shape)          # (2, 3, 32) = (batch, token, output=context_sz)
+    print(embedding.embeddings[1])                  # Embedding of token=1
+    print("Sample vector:", embedded_output[0, 0])  # Embedding of first sequence of first token(embeddings[input_tokens[0,0]=1])
