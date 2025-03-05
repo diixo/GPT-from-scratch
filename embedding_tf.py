@@ -2,6 +2,7 @@ import tensorflow as tf
 
 
 class Embedding(tf.keras.layers.Layer):
+
     def __init__(self, input_dim, output_dim):
         super().__init__()
         self.input_dim = input_dim
@@ -12,9 +13,9 @@ class Embedding(tf.keras.layers.Layer):
             trainable=True
         )
     
-    def call(self, x):
+    def call(self, ids):
         # return row[.., output_dim]
-        return tf.nn.embedding_lookup(self.embeddings, x)
+        return tf.nn.embedding_lookup(self.embeddings, ids)
 
 
 def test():

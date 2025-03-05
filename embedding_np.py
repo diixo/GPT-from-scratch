@@ -9,11 +9,11 @@ class Embedding:
         self.embeddings = np.random.randn(input_dim, output_dim) * 0.1
         self.shape = self.embeddings.shape
 
-    def forward(self, x):
-        return self.embeddings[x]
+    def forward(self, ids):
+        return self.embeddings[ids]
 
-    def __call__(self, x):
-        return self.forward(x)
+    def __call__(self, ids):
+        return self.forward(ids)
 
 
 def test():
