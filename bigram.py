@@ -7,7 +7,7 @@ batch_size = 32
 block_size = 8
 max_iters = 5000
 eval_interval = 100
-learning_rate = 1e-2
+learning_rate = 5e-3
 eval_iters = 200
 
 tf.random.set_seed(1337)
@@ -94,9 +94,6 @@ class BigramLanguageModel(keras.Model):
         return idx
 
 
-model = BigramLanguageModel(vocab_size)
-
-
 def train_model(model: BigramLanguageModel):
     optimizer = tf.optimizers.Adam(learning_rate)
 
@@ -117,10 +114,11 @@ def train_model(model: BigramLanguageModel):
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 
+
+model = BigramLanguageModel(vocab_size)
 train_model(model)
 
-# Generate from the model
+# Generate text from the model
 idx = tf.zeros((1, 1), dtype=tf.int64)  # (B, T)
 generated_text = decode(model.generate(idx, max_new_tokens=500).numpy()[0])
 print(generated_text)
-
