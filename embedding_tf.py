@@ -10,19 +10,20 @@ class Embedding(tf.keras.layers.Layer):
         self.embeddings = self.add_weight(
             shape=(input_dim, output_dim),
             initializer=tf.keras.initializers.RandomNormal(mean=0.0, stddev=0.2),
-            trainable=True
-        )
-    
+            trainable=True)
+        self.shape = self.embeddings.shape
+  
     def call(self, ids):
         # return row[.., output_dim]
         return tf.nn.embedding_lookup(self.embeddings, ids)
 
 
 def test():
+
     vocab_sz = 1000
     context_sz = 32
     embedding = Embedding(input_dim=vocab_sz, output_dim=context_sz)
-    print("Embedding.shape:", embedding.embeddings.shape)
+    print("Embedding.shape:", embedding.shape)
 
 
     logits = embedding(tf.constant([[1, 5, 10], [7, 2, 0]]))
