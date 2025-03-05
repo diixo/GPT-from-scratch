@@ -5,7 +5,7 @@ from keras import layers
 # Hyperparameters
 batch_size = 32
 block_size = 8
-max_iters = 3000
+max_iters = 5000
 eval_interval = 100
 learning_rate = 1e-2
 eval_iters = 200
@@ -59,12 +59,16 @@ class BigramLanguageModel(keras.Model):
 
     def __init__(self, vocab_size):
         super(BigramLanguageModel, self).__init__()
+        # each token directly reads off the logits for the next token from a lookup table
         self.token_embedding_table = layers.Embedding(vocab_size, vocab_size)
 
 
     def call(self, idx, targets=None):
 
-        logits = self.token_embedding_table(idx)
+        # idx and targets are both (B=batch, T=time) tensor of integers
+        logits = self.token_embedding_table(idx) # (B=batch, T=time, C=channel=vocab_size)
+        # logits interprate the scores for the next character in the sequence
+
         if targets is None:
             loss = None
         else:
@@ -77,38 +81,46 @@ class BigramLanguageModel(keras.Model):
 
     def generate(self, idx, max_new_tokens):
         for _ in tf.range(max_new_tokens):
-            logits, _ = self(idx)
-            logits = logits[:, -1, :]
-            probs = tf.nn.softmax(logits, axis=-1)
-            idx_next = tf.random.categorical(tf.math.log(probs), num_samples=1, dtype=tf.int64)
-            idx = tf.concat([idx, idx_next], axis=1)
+            # get the prediction by logits, loss ignored. 
+            logits, loss = self(idx)    # forward to get logits = (B, T, C)
+            # focus only on last time step
+            logits = logits[:, -1, :]   # becomes (B, C)
+            # apply softmax to get max probability
+            probs = tf.nn.softmax(logits, axis=-1)  # (B, C)
+            # get next char-index
+            idx_next = tf.random.categorical(tf.math.log(probs), num_samples=1, dtype=tf.int64) # (B, 1)
+            # concatenate to stream of integer indices
+            idx = tf.concat([idx, idx_next], axis=1)    # (B, T+1)
         return idx
 
 
 model = BigramLanguageModel(vocab_size)
 
 
-optimizer = tf.optimizers.Adam(learning_rate)
+def train_model(model: BigramLanguageModel):
+    optimizer = tf.optimizers.Adam(learning_rate)
 
-for iter in tf.range(max_iters):
+    for iter in tf.range(max_iters):
 
-    if iter % eval_interval == 0:
-        losses = estimate_loss()
-        print(f"step {iter.numpy()}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+        if iter % eval_interval == 0:
+            losses = estimate_loss()
+            print(f"step {iter.numpy()}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
 
-    xb, yb = get_batch('train')
+        xb, yb = get_batch('train')
 
-    with tf.GradientTape() as tape:
-        # forward pass
-        logits, loss = model(xb, yb)
+        with tf.GradientTape() as tape:
+            # forward pass
+            logits, loss = model(xb, yb)
 
-    # backward pass
-    gradients = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        # backward pass
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
+
+train_model(model)
 
 # Generate from the model
-context = tf.zeros((1, 1), dtype=tf.int64)
-generated_text = decode(model.generate(context, max_new_tokens=500).numpy()[0])
+idx = tf.zeros((1, 1), dtype=tf.int64)  # (B, T)
+generated_text = decode(model.generate(idx, max_new_tokens=500).numpy()[0])
 print(generated_text)
 
