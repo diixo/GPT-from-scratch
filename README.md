@@ -1,5 +1,7 @@
 # GPT-from-scratch
 
+[embedding.py](embedding.py) was implemented at first, to understand how embeddings work conceptually.
+
 This project is a TensorFlow implementation of Andrej Karpathy's [ng-video-lecture](https://www.youtube.com/watch?v=kCc8FmEb1nY) project, which can be found at the original link: [ng-video-lecture](https://github.com/karpathy/ng-video-lecture/blob/master).
 
 ## About the Project
